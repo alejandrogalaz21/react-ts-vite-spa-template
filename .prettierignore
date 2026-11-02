@@ -1,0 +1,12 @@
+build
+coverage
+storybook-static
+playwright-report
+test-results
+.react-router
+package-lock.json
+src/styles/tokens.css
+.claude/skills/openspec-*
+.claude/commands/opsx
+.claude/skills/react-router
+.impeccable

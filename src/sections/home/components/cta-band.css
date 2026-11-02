@@ -1,0 +1,8 @@
+.cta-band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 44rem;
+  text-align: center;
+}

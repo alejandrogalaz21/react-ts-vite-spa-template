@@ -1,0 +1,44 @@
+.text-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.text-field__label {
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.text-field__hint {
+  color: var(--color-ink-subtle);
+  font-size: 0.875rem;
+}
+
+.text-field__control {
+  min-height: var(--layout-touch-target);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.text-field__control:hover {
+  border-color: var(--color-ink-subtle);
+}
+
+.text-field__control[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.text-field__control--multiline {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.text-field__error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

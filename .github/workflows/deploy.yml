@@ -1,0 +1,89 @@
+name: deploy
+
+# Push to main (site files only) plus a manual trigger. The deploy job only runs when the
+# repository variable DEPLOY_TARGET is set; a fresh copy of the template builds but publishes
+# nothing until someone configures a target. See docs/deploy.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/**
+      - public/**
+      - design/**
+      - scripts/**
+      - package.json
+      - package-lock.json
+      - react-router.config.ts
+      - vite.config.ts
+      - tsconfig.json
+      - .github/workflows/deploy.yml
+  workflow_dispatch:
+
+# Never cancel a deploy mid-sync: a run cut during the prune step could delete files the live
+# HTML still references. A second push queues behind the first.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Build without cloud access. Whatever comes out of here is exactly what gets published.
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    # VITE_* values are *environment* variables of `prod`: a job only sees them when it declares
+    # the environment. No id-token here, so this grants no cloud access.
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - name: build
+        run: npm run build
+        env:
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+          VITE_ALLOW_INDEXING: ${{ vars.VITE_ALLOW_INDEXING }}
+          VITE_GA_MEASUREMENT_ID: ${{ vars.VITE_GA_MEASUREMENT_ID }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_APP_COMMIT: ${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: build/client
+          retention-days: 5
+          if-no-files-found: error
+
+  # S3 + CloudFront through OIDC (no stored keys). Other hosts: add a job with its own `if`.
+  deploy-aws:
+    name: deploy (aws s3 + cloudfront)
+    needs: build
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_TARGET == 'aws'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      # Required for the OIDC token exchange with AWS.
+      id-token: write
+    steps:
+      # The checkout is only for scripts/deploy-aws.sh; the site comes from the artifact.
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: build/client
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-session-name: deploy-${{ github.event.repository.name }}-${{ github.run_id }}
+      - name: sync and invalidate
+        run: bash scripts/deploy-aws.sh --skip-build
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          DEPLOY_SSM_PREFIX: ${{ vars.DEPLOY_SSM_PREFIX }}

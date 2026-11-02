@@ -1,0 +1,8 @@
+{
+  "name": "Lorem Studio",
+  "shortName": "Lorem",
+  "defaultOgImage": "/og-default.png",
+  "themeColor": "#4f46e5",
+  "twitterHandle": "@loremstudio",
+  "email": "hello@example.com"
+}

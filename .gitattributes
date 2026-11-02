@@ -1,0 +1,13 @@
+# Normalise line endings to LF in the repository. Windows checkouts stop producing CRLF noise
+# and CI (Linux) sees the same bytes as every developer.
+* text=auto eol=lf
+
+# Binary assets: never touch their bytes.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,25 @@
+# Weekly dependency updates, grouped so a week produces a handful of PRs, not dozens.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      react-router:
+        patterns: ['react-router', '@react-router/*']
+      testing:
+        patterns:
+          ['vitest', '@vitest/*', '@playwright/test', '@axe-core/*', '@testing-library/*', 'msw', 'jsdom']
+      lint-format:
+        patterns: ['eslint', '@eslint/*', 'eslint-*', 'typescript-eslint', 'prettier', 'globals']
+      storybook:
+        patterns: ['storybook', '@storybook/*']
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
