@@ -1,0 +1,19 @@
+.not-found__suggestions {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.not-found__suggestions-title {
+  color: var(--color-ink-muted);
+}
+
+.not-found__suggestions-list {
+  margin-top: var(--space-3);
+}
+
+.not-found__suggestion {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}

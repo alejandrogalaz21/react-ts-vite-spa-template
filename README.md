@@ -11,7 +11,7 @@ Base para crear SPAs con React + TypeScript + Vite. Reúne las buenas prácticas
   - Metadatos: title, description, canonical, hreflang, Open Graph, Twitter y JSON-LD.
   - Archivos: sitemap y robots.
   - 404 real con `noindex`.
-- **i18n por URL** (`/` en español, `/en` en inglés) con diccionarios tipados.
+- **i18n por URL** (`/` en español, `/en` en inglés) con textos tipados por feature.
 - **Design tokens** en JSON → CSS, temas claro y oscuro sin parpadeo, Inter self-hosted (solo latin).
 - **Analytics GA4 sin librería** con Consent Mode v2, banner y page views por navegación.
 - **Formulario accesible** con zod + React Query + MSW.
@@ -44,7 +44,8 @@ Recorrido sugerido del sitio lorem:
 | 3    | `/blog` → un post                     | Contenido desde JSON validado con zod; JSON-LD `BlogPosting`   |
 | 4    | `/contact`                            | Validación accesible, foco al primer error y envío simulado    |
 | 5    | `/privacy`                            | Estado del consentimiento de analytics                         |
-| 6    | `/lo-que-sea`                         | 404 con chrome del sitio                                       |
+| 6    | `/lo-que-sea`                         | 404 con chrome del sitio y sugerencias de páginas              |
+| 6b   | `/services`                           | "Próximamente": página con su flag apagada (`features.ts`)     |
 | 7    | `npm run build && npm run preview`    | El build estático en `:4173`; ver `build/client/sitemap.xml`   |
 | 8    | Ver código fuente de cualquier página | HTML completo prerenderizado, con todos los meta               |
 | 9    | `npm run storybook`                   | Primitivos de UI en ambos temas                                |
@@ -64,22 +65,22 @@ Recorrido sugerido del sitio lorem:
 | `test:scripts`                          | Tests de los scripts de build (`node:test`)                                  |
 | `test:e2e`                              | Playwright + axe contra el build                                             |
 | `storybook` / `build-storybook`         | Storybook                                                                    |
-| `tokens` / `tokens:check`               | Genera / verifica `src/styles/tokens.css`                                    |
+| `tokens` / `tokens:check`               | Genera / verifica `src/shared/styles/tokens.css`                             |
 | `knip`                                  | Código y dependencias sin usar                                               |
 | `check`                                 | Todo lo anterior salvo e2e y Storybook: lo mismo que el job de calidad de CI |
 
 ## Estructura resumida
 
 ```
-src/
-  root.tsx  routes.ts           documento HTML, providers, tabla de rutas
-  routes/                       módulos de ruta delgados (loader + meta + vista), prerender.ts
-  sections/<dominio>/           views/ components/ hooks/  (la página y su lógica)
-  components/ui/<nombre>/       primitivos: .tsx .css .stories.tsx .test.tsx
-  layout/                       header, footer, shell
-  actions/  lib/  types/        datos (async + mappers), http/query-client, schemas zod
-  i18n/  seo/  analytics/       locales y diccionarios, buildMeta + JSON-LD, GA4 + consentimiento
-  config/  content/  styles/    env validado + site.json, contenido JSON, tokens + global.css
+src/                            app → features → shared (ESLint fuerza el sentido)
+  app/                          root.tsx, routes.ts, routes/ (delgadas + prerender.ts), layout/
+  features/<dominio>/           api/ types.ts hooks/ components/ views/ content/ i18n/ + index.ts
+  shared/
+    ui/<nombre>/                primitivos: .tsx .css .stories.tsx .test.tsx
+    i18n/  seo/  config/        locale + chrome, buildMeta + JSON-LD, env + site.json + features.ts
+    feature-flags/  analytics/  FeatureGate/useFeatureFlag, GA4 + consentimiento
+    lib/  hooks/  utils/        http/query-client, hooks y funciones genéricas
+    styles/  test/              tokens + global.css, setup de Vitest/MSW
 design/tokens.json              fuente de los design tokens
 scripts/                        tokens, postbuild (sitemap/robots), preview, deploy AWS
 e2e/                            Playwright + axe
@@ -120,17 +121,32 @@ El árbol completo, con qué va en cada carpeta, está en [docs/architecture.md]
 | Git hooks          | husky + lint-staged + commitlint                   | 9.1 / 17.6 / 21.2                                     |
 | Código muerto      | knip                                               | 6.44                                                  |
 
+## `base-v1` frente a `base-v2-features`
+
+Mismo sitio, mismas pruebas; cambia cómo se organiza `src/` (ADR [0009](docs/decisions/0009-feature-folders.md)).
+
+| Aspecto                      | `base-v1`                                                       | `base-v2-features`                                    |
+| ---------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
+| Carpetas en la raíz de `src` | 17                                                              | 3 (`app`, `features`, `shared`)                       |
+| Dónde vive el blog           | `sections/blog`, `actions/posts*`, `types/post.ts`, `content/*` | `features/blog/` (todo junto)                         |
+| Rutas importan               | Cualquier archivo interno                                       | Solo `#features/<dominio>` (su `index.ts`)            |
+| Reglas de dependencia        | Documentadas                                                    | Documentadas y forzadas por ESLint                    |
+| Alias                        | `~/` (= `src/`); `prerender.ts` con relativos                   | `#app/` `#features/` `#shared/` (Node), sin relativos |
+| Textos                       | Un diccionario con todo                                         | Cada feature tiene su `i18n/`; global solo el chrome  |
+| Borrar una funcionalidad     | 4–5 carpetas + rutas                                            | 1 carpeta + rutas                                     |
+| `appDirectory` de RR         | `src`                                                           | `src/app`                                             |
+
 ## Comparativa: qué contiene esta rama
 
-Cómo resuelve `base-v1` cada aspecto frente a los dos proyectos de referencia. **Origen** indica de dónde se tomó la práctica.
+Cómo resuelve `base-v2-features` cada aspecto frente a los dos proyectos de referencia. **Origen** indica de dónde se tomó la práctica.
 
-| Aspecto               | alejandrogalaz.space           | kettuimx (landing)                       | **base-v1**                                                                 | Origen                                   |
+| Aspecto               | alejandrogalaz.space           | kettuimx (landing)                       | **base-v2-features**                                                        | Origen                                   |
 | --------------------- | ------------------------------ | ---------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------- |
 | React / Vite / TS     | 18 / 5 / 5.6                   | 18 / 5 / 5.5                             | **19.3 / 8.3 / 6.0**                                                        | Actualizado                              |
 | Router                | RR 6 + vite-react-ssg 0.8      | Sin router (anclas)                      | **RR 8 framework mode**                                                     | Nuevo                                    |
 | Prerender / SSG       | Sí (vite-react-ssg)            | No                                       | **Sí, nativo de RR (`ssr:false` + `prerender`)**                            | alejandrogalaz.space, sin la dependencia |
 | Code splitting        | No                             | No                                       | **Por ruta, automático**                                                    | Nuevo                                    |
-| Arquitectura          | Capas `view → hooks → actions` | `components / sections / pages`          | **Capas + `sections/<dominio>/{views,components,hooks}` + `components/ui`** | Ambos                                    |
+| Arquitectura          | Capas `view → hooks → actions` | `components / sections / pages`          | **`app → features → shared`, features autocontenidas, fronteras en ESLint** | Nuevo                                    |
 | Estado servidor       | React Query (`initialData`)    | `useState`                               | **Loaders en build + React Query para mutaciones/datos vivos**              | alejandrogalaz.space                     |
 | HTTP                  | axios (sin usar)               | —                                        | **`fetch` + timeout + `HttpError`** (0 KB)                                  | Nuevo                                    |
 | Validación            | —                              | Validadores manuales                     | **zod 4 (env, contenido, formularios)**                                     | Nuevo                                    |

@@ -10,6 +10,15 @@ import tseslint from 'typescript-eslint';
 const TS_FILES = ['**/*.{ts,tsx}'];
 
 /**
+ * Relative imports stay inside one folder: `./x` or `../x`. Going up two or more levels means
+ * crossing into another module, which must use a `#` alias so the layer rules below can see it.
+ */
+const NO_DEEP_RELATIVE = {
+  regex: String.raw`^(\.\./){2,}`,
+  message: "Use a '#app/', '#features/' or '#shared/' alias to import from another folder.",
+};
+
+/**
  * ESLint flat config.
  *
  * - typescript-eslint `recommendedTypeChecked` on TS files: rules that need type information
@@ -64,10 +73,64 @@ export default tseslint.config(
     files: ['src/**/*.tsx'],
     ...jsxA11y.configs.recommended,
   },
+  // Dependency direction: app -> features -> shared. See docs/architecture.md.
+  {
+    files: ['src/shared/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            NO_DEEP_RELATIVE,
+            {
+              regex: '^#(app|features)/',
+              message: 'shared/ cannot depend on app/ or features/.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            NO_DEEP_RELATIVE,
+            { regex: '^#app/', message: 'features/ cannot depend on app/.' },
+            {
+              regex: '^#features/',
+              message:
+                'A feature cannot import another feature: compose them in app/ or move the code to shared/.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            NO_DEEP_RELATIVE,
+            {
+              regex: '^#features/[^/]+/',
+              message: "Import a feature through its public API: '#features/<name>'.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   {
     plugins: { perfectionist },
     rules: {
-      'perfectionist/sort-imports': ['error', { type: 'natural', internalPattern: ['^~/.+'] }],
+      'perfectionist/sort-imports': ['error', { type: 'natural', internalPattern: ['^#.+'] }],
       'perfectionist/sort-named-imports': ['error', { type: 'natural' }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },

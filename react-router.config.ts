@@ -1,6 +1,6 @@
 import type { Config } from '@react-router/dev/config';
 
-import { getPrerenderPaths } from './src/routes/prerender';
+import { getPrerenderPaths } from './src/app/routes/prerender';
 
 /**
  * React Router framework mode, static output only.
@@ -10,11 +10,12 @@ import { getPrerenderPaths } from './src/routes/prerender';
  * - `prerender`: every public URL is rendered to its own `index.html` at build time, so crawlers
  *   and link previews get the full HTML, `<title>`, meta tags and JSON-LD without running JS.
  *
- * Add a page: register it in `src/routes.ts` and, when it has dynamic params, list its values in
- * `src/routes/prerender.ts`.
+ * `appDirectory` is `src/app`: root, route table and route modules. Pages live in `src/features`.
+ *
+ * Add a page: register it in `src/app/routes.ts` and list its URLs in `src/app/routes/prerender.ts`.
  */
 export default {
-  appDirectory: 'src',
+  appDirectory: 'src/app',
   ssr: false,
   prerender: getPrerenderPaths,
 } satisfies Config;

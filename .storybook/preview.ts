@@ -1,7 +1,7 @@
 import type { Decorator, Preview } from '@storybook/react-vite';
 
-import '../src/styles/tokens.css';
-import '../src/styles/global.css';
+import '../src/shared/styles/tokens.css';
+import '../src/shared/styles/global.css';
 
 /** Applies the toolbar theme to <html data-theme>, exactly like public/theme-init.js does in the app. */
 const withTheme: Decorator = (Story, context) => {

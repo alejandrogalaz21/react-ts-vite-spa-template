@@ -2,11 +2,11 @@ import { reactRouter } from '@react-router/dev/vite';
 import { defineConfig, loadEnv } from 'vite';
 
 import pkg from './package.json' with { type: 'json' };
-import { parseEnv } from './src/config/env.schema.ts';
+import { parseEnv } from './src/shared/config/env.schema.ts';
 
 export default defineConfig(({ mode }) => {
   // Fail the build before anything is bundled when a VITE_* variable is malformed. The same schema
-  // validates `import.meta.env` at runtime (src/config/env.ts), so the rules live in one place.
+  // validates `import.meta.env` at runtime (src/shared/config/env.ts), so the rules live in one place.
   parseEnv(loadEnv(mode, process.cwd(), 'VITE_'));
 
   return {

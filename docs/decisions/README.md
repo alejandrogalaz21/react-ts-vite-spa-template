@@ -11,5 +11,7 @@ Cada decisión que no es obvia leyendo el código queda aquí: contexto, decisi�
 | [0005](0005-i18n-in-url.md)            | i18n sin librería, locale en la URL                        | Aceptada           |
 | [0006](0006-typescript-6.md)           | TypeScript 6.0, no 7.0                                     | Aceptada (revisar) |
 | [0007](0007-deploy-agnostic.md)        | Deploy agnóstico, AWS opcional                             | Aceptada           |
+| [0008](0008-openspec-in-docs.md)       | OpenSpec dentro de `docs/`                                 | Aceptada           |
+| [0009](0009-feature-folders.md)        | Estructura por features: `app → features → shared`         | Aceptada           |
 
 Plantilla para una nueva: copia cualquiera y cambia número y título.

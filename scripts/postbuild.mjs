@@ -2,7 +2,7 @@
  * Runs after `react-router build` (see the `build` script). Writes robots.txt and sitemap.xml into
  * build/client from the prerendered HTML, and fails the build when the SEO tags are inconsistent.
  *
- * Origin and indexing come from the same validated env as the app (src/config/env.schema.ts,
+ * Origin and indexing come from the same validated env as the app (src/shared/config/env.schema.ts,
  * loaded with Node type stripping), so the sitemap can never disagree with the canonical URLs.
  */
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnv } from 'vite';
 
-import { parseEnv } from '../src/config/env.schema.ts';
+import { parseEnv } from '../src/shared/config/env.schema.ts';
 import { extractPageLinks, planSitemap, renderRobots, renderSitemap, routeFromFile } from './seo/sitemap.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));

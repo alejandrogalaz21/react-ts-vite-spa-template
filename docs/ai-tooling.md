@@ -10,7 +10,7 @@ El repo trae lo necesario para que Claude Code (y otros agentes) trabajen con la
 | `.claude/settings.json`         | Permisos del proyecto (scripts npm, Playwright, OpenSpec, git de lectura), deny de `.env` y `git push --force`, hook de formateo. |
 | `.claude/hooks/format-file.mjs` | `PostToolUse` en Edit/Write: `eslint --fix` + `prettier` al archivo tocado. Nunca bloquea.                                        |
 | `.mcp.json`                     | MCP del proyecto (ver abajo). Cada persona los aprueba la primera vez.                                                            |
-| `openspec/`                     | Flujo spec-driven: `config.yaml` con el contexto del proyecto, `specs/` y `changes/`.                                             |
+| `docs/openspec/`                | Flujo spec-driven: `config.yaml` con el contexto del proyecto, `specs/` y `changes/`. Raíz de OpenSpec: `docs/`.                  |
 
 ## Skills (`.claude/skills/`)
 
@@ -31,6 +31,14 @@ Las skills de marca (`design-system-alejandro-galaz`, etc.) **no** van en la bas
 | `context7`   | Docs actuales de librerías (React Router 8, Vite 8, zod 4…). Sin API key en el repo: tier público; para más cuota, configúrala en tu `~/.claude.json`. |
 | `playwright` | Abrir el sitio, inspeccionar, capturar pantallas y depurar e2e desde el agente.                                                                        |
 
+## OpenSpec en `docs/`
+
+Los specs y changes son documentación del proyecto, por eso viven en `docs/openspec/`. La CLI de OpenSpec no permite configurar la ruta: busca un directorio `openspec/` desde el directorio actual hacia arriba. Por eso:
+
+- Los comandos de OpenSpec se corren desde `docs/`: `cd docs && openspec list`.
+- Las skills `openspec-*` resuelven la raíz con `openspec context --json`; `CLAUDE.md` le indica al agente que lo haga desde `docs/`.
+- `openspec update` (regenerar skills y comandos) sí se corre desde la raíz del repo, porque escribe en `.claude/`.
+
 ## Flujo recomendado
 
 1. **Cambio grande o ambiguo**: `/opsx:propose "<idea>"`. Revisa proposal, design y tasks.
@@ -41,6 +49,6 @@ Las skills de marca (`design-system-alejandro-galaz`, etc.) **no** van en la bas
 ## Actualizar
 
 ```bash
-npx @fission-ai/openspec@latest update   # regenera skills y comandos de OpenSpec
+npx @fission-ai/openspec@latest update   # desde la raíz: regenera skills y comandos de OpenSpec
 npx create-react-router@latest tmp       # trae la skill react-router más reciente desde tmp/.agents/skills
 ```
