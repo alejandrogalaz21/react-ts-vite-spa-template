@@ -73,7 +73,7 @@ jobs:
     steps:
       # The checkout is only for scripts/deploy-aws.sh; the site comes from the artifact.
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: site
           path: build/client
