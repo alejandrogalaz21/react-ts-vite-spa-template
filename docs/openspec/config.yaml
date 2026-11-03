@@ -1,0 +1,24 @@
+schema: spec-driven
+
+# Constraints that guide OpenSpec artifacts. Only what an agent cannot infer from the code.
+context: |
+  Static React SPA: React Router framework mode with ssr:false + prerender. There is no runtime
+  server: loaders run at build time only, there are no actions, and every public URL must be
+  listed in src/app/routes/prerender.ts.
+  src/ has three folders, dependencies one-way: app -> features -> shared (enforced by ESLint).
+  A feature (src/features/<name>) is self-contained: api/, types.ts, hooks/, components/, views/,
+  index.ts (public API). app/ imports features only through index.ts; features never import each other.
+  Route modules stay thin.
+  Every user-facing string lives in src/features/<name>/i18n/{es,en}.ts (es is the source of the type);
+  only site chrome (nav, theme, consent, footer) lives in src/shared/i18n/dictionaries.
+  Cross-folder imports use #app/, #features/, #shared/ aliases; relative imports never go up two levels.
+  Code, identifiers and code comments in English; proposals, designs and tasks in Spanish.
+  Every change keeps `npm run check` and `npm run test:e2e` green; new pages get e2e coverage.
+  VITE_* variables are public: never put secrets in them.
+
+rules:
+  proposal:
+    - State what is out of scope.
+    - Name the routes, components and env variables the change touches.
+  tasks:
+    - Include the test tasks (unit, e2e, a11y) next to the implementation tasks, not at the end.

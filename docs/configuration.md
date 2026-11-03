@@ -4,10 +4,10 @@
 
 Todas son `VITE_*` y **públicas**: Vite las incrusta en el bundle. Nunca pongas un secreto aquí.
 
-El schema está en `src/config/env.schema.ts` y se aplica en tres lugares:
+El schema está en `src/shared/config/env.schema.ts` y se aplica en tres lugares:
 
 1. `vite.config.ts`: el build falla antes de empaquetar si un valor es inválido.
-2. `src/config/env.ts`: acceso tipado en la app (`import { env } from '~/config/env'`).
+2. `src/shared/config/env.ts`: acceso tipado en la app (`import { env } from '#shared/config/env'`).
 3. `scripts/postbuild.mjs`: el sitemap usa el mismo origen que los canonical.
 
 Un valor vacío cuenta como "no definido" y toma el default.
@@ -24,9 +24,13 @@ Local: copia `.env.example` a `.env.local`. CI: variables del environment `prod`
 
 Variable nueva: agrégala al schema, a `.env.example`, a esta tabla y, si aplica, a `deploy.yml`.
 
+## Feature flags
+
+`src/shared/config/features.ts`: qué páginas y bloques están encendidos. Se resuelven en el build, no son variables de entorno ni secretos. Detalle en [architecture.md](architecture.md#feature-flags).
+
 ## Identidad del sitio
 
-`src/config/site.json`: nombre, nombre corto, imagen OG por defecto, color de tema, usuario de X/Twitter y email de contacto. Lo leen el `<head>`, el JSON-LD y el footer.
+`src/shared/config/site.json`: nombre, nombre corto, imagen OG por defecto, color de tema, usuario de X/Twitter y email de contacto. Lo leen el `<head>`, el JSON-LD y el footer.
 
 Acompáñalo de:
 
@@ -39,7 +43,7 @@ Acompáñalo de:
 `design/tokens.json` es la fuente única de color (tema claro y oscuro), tipografía, espacio, radios y layout.
 
 ```bash
-npm run tokens         # regenera src/styles/tokens.css
+npm run tokens         # regenera src/shared/styles/tokens.css
 npm run tokens:check   # CI: falla si el CSS no coincide con el JSON
 ```
 
@@ -47,4 +51,4 @@ El CSS generado se versiona: dev, tests y Storybook no dependen de un paso de bu
 
 ## Locales
 
-`src/i18n/config.ts`: `LOCALES`, `DEFAULT_LOCALE` (sin prefijo en la URL) y `LOCALE_TAGS` (para `og:locale` e `Intl`). Ver `docs/i18n.md`.
+`src/shared/i18n/config.ts`: `LOCALES`, `DEFAULT_LOCALE` (sin prefijo en la URL) y `LOCALE_TAGS` (para `og:locale` e `Intl`). Ver `docs/i18n.md`.

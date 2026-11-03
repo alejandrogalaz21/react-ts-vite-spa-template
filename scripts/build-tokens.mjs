@@ -1,5 +1,5 @@
 /**
- * Generates src/styles/tokens.css from design/tokens.json.
+ * Generates src/shared/styles/tokens.css from design/tokens.json.
  *
  *   node scripts/build-tokens.mjs           write the CSS
  *   node scripts/build-tokens.mjs --check   exit 1 if the committed CSS is stale (CI)
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const SOURCE = `${root}design/tokens.json`;
-const TARGET = `${root}src/styles/tokens.css`;
+const TARGET = `${root}src/shared/styles/tokens.css`;
 
 /**
  * Pure transform from the token document to CSS text. Exported for scripts/build-tokens.test.mjs.
@@ -59,7 +59,7 @@ if (isMain) {
       // Missing file counts as stale.
     }
     if (current !== css) {
-      console.error('src/styles/tokens.css is stale. Run `npm run tokens` and commit the result.');
+      console.error('src/shared/styles/tokens.css is stale. Run `npm run tokens` and commit the result.');
       process.exit(1);
     }
     console.log('tokens.css is up to date');

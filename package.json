@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#app/*": "./src/app/*",
+    "#features/*": "./src/features/*",
+    "#shared/*": "./src/shared/*"
+  },
   "description": "Base template for React + TypeScript + Vite SPAs with static prerender, SEO, i18n and analytics.",
   "engines": {
     "node": ">=22"

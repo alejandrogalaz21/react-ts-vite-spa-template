@@ -3,7 +3,7 @@
  * whole set and serialize sitemap.xml / robots.txt. No filesystem access, so sitemap.test.mjs
  * covers every rule with plain strings.
  *
- * The tags are machine-generated (src/seo/meta.ts), so targeted regexes over <head> are enough;
+ * The tags are machine-generated (src/shared/seo/meta.ts), so targeted regexes over <head> are enough;
  * anything they do not understand ends in a SitemapError instead of a silently wrong file.
  */
 

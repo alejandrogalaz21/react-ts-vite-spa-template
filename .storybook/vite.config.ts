@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-/** Minimal Vite config for Storybook: React + the `~` alias, no React Router plugin. */
+/** Minimal Vite config for Storybook: React + the `#` aliases, no React Router plugin. */
 export default defineConfig({
   plugins: [react()],
   resolve: { tsconfigPaths: true },

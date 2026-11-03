@@ -7,7 +7,7 @@
 - [ ] `npm run check` pasa en local
 - [ ] e2e (`npm run test:e2e`) pasa, o el cambio no toca páginas
 - [ ] Probado en móvil y desktop, tema claro y oscuro
-- [ ] Textos nuevos en todos los diccionarios (`src/i18n/dictionaries/*`)
+- [ ] Textos nuevos en todos los locales (`src/features/<x>/i18n/*` o `src/shared/i18n/dictionaries/*`)
 
 ## Notas para revisión
 

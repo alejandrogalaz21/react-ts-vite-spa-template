@@ -1,7 +1,7 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
 /**
- * Storybook documents the design-system primitives (src/components/ui). It uses its own Vite
+ * Storybook documents the design-system primitives (src/shared/ui). It uses its own Vite
  * config: the React Router plugin in vite.config.ts builds a full app and does not run here.
  */
 const config: StorybookConfig = {

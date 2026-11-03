@@ -11,7 +11,7 @@ npm run preview        # sirve build/client como el host (clean URLs, 404 real),
 npm run check          # tokens, tipos, lint, formato, knip, unit, scripts, build (= CI)
 npm run test:e2e       # Playwright + axe contra el build
 npm run storybook      # primitivos de UI
-npm run tokens         # design/tokens.json → src/styles/tokens.css
+npm run tokens         # design/tokens.json → src/shared/styles/tokens.css
 ```
 
 ## Definición de terminado
@@ -21,29 +21,32 @@ Un cambio está terminado solo si `npm run check` y `npm run test:e2e` pasan. Ad
 - **Página nueva**: entra en `e2e/a11y.spec.ts`.
 - **Componente de UI**: tiene story.
 - **Lógica**: tiene test unitario.
-- **Texto visible**: existe en todos los diccionarios.
+- **Texto visible**: existe en todos los locales (`es.ts` y `en.ts` de la feature o del diccionario global).
 
 ## Arquitectura (detalle en docs/architecture.md)
 
-Capas en un solo sentido: `routes → sections/views → sections/components → components/ui`, y `sections/hooks → actions → lib`.
+Tres carpetas, dependencias en un solo sentido: **`app → features → shared`** (ESLint lo fuerza con `no-restricted-imports`).
 
-- `src/routes/*.tsx`: delgados. `loader` (corre en el **build**) + `meta` con `buildMeta()` + una vista. Sin lógica ni markup.
-- `src/sections/<dominio>/{views,components,hooks}`: la página y su lógica.
-- `src/components/ui/`: primitivos sin i18n, sin datos, sin router.
-- `src/actions/`: acceso a datos async + mappers. `src/lib/`: http, query-client.
-- `src/i18n/`: locale en la URL; `es.ts` define el tipo `Dictionary`.
-- `src/seo/`: `buildMeta()` y builders JSON-LD. Único lugar que emite tags SEO.
-- `src/config/env.schema.ts`: schema zod de `VITE_*`. Nunca leas `import.meta.env` directo.
+- `src/app/`: `root.tsx`, `routes.ts`, `routes/*.tsx` y `layout/` (header, footer, shell). Es el `appDirectory` de React Router. Las rutas son delgadas: `loader` (corre en el **build**) + `meta` con `buildMeta()` + una vista.
+- `src/features/<dominio>/`: todo lo del dominio junto: `api/` (datos + mappers), `types.ts` (zod), `hooks/`, `components/`, `views/`, `content/`, `i18n/` (textos de la feature). Su `index.ts` es la API pública: `app/` importa `#features/<dominio>`, nunca rutas internas. Una feature **no** importa otra.
+- `src/shared/`: sin conocimiento de features.
+  - `ui/`: primitivos sin i18n, sin datos, sin router.
+  - `i18n/`: locale en la URL; `useI18n()` y el diccionario global (solo chrome: nav, tema, consentimiento, footer). `useLocaleText()` para los textos de cada feature.
+  - `seo/`: `buildMeta()` y builders JSON-LD. Único lugar que emite tags SEO.
+  - `config/`: `env.schema.ts` (zod de `VITE_*`; nunca leas `import.meta.env` directo), `site.json`, `features.ts` (flags).
+  - `feature-flags/`, `analytics/`, `lib/` (http, query-client), `hooks/`, `utils/`, `styles/`, `test/`.
+- Página apagada en `features.ts` = "Próximamente" con `noindex`.
 
 ## Reglas duras
 
 - No hay runtime server: **sin `action`**, los `loader` solo leen datos de build. Datos en vivo con React Query.
-- **Toda URL pública en `src/routes/prerender.ts`**. Si falta, el host responde 404.
-- **Texto visible solo vía diccionario.** Nada de literales en JSX.
+- **Toda URL pública en `src/app/routes/prerender.ts`**. Si falta, el host responde 404.
+- **Toda página tiene su flag** `pages.<nombre>` en `src/shared/config/features.ts`, y su ruta la respeta (`comingSoonMeta` + `<FeatureGate>`).
+- **Texto visible solo vía i18n.** Textos de una feature en `features/<x>/i18n/{es,en}.ts` (`use<X>Text()`, y `<x>Text[locale]` en `meta`); del chrome en `shared/i18n/dictionaries`. Nada de literales en JSX.
 - **Estilos solo con tokens** (`var(--color-*)`, `var(--space-*)`…). Clases BEM, un `.css` por componente.
 - **Un `<h1>` por página.** Elementos nativos, objetivo táctil ≥ 44px, foco visible, iconos `aria-hidden`.
 - **Código, identificadores y comentarios en inglés.** JSDoc en cada export. Sin `any`.
-- **Archivos en kebab-case**, componentes en PascalCase. Alias `~/` = `src/`. Excepción: `routes/prerender.ts` → `actions/posts.ts` (y lo que importe) usa imports relativos, porque `react-router.config.ts` los carga sin alias.
+- **Archivos en kebab-case**, componentes en PascalCase. Alias por capa `#app/*`, `#features/*`, `#shared/*` (subpath imports de Node en `package.json`, espejados en `paths` de `tsconfig.json`) para cruzar carpetas; relativos (`./`, `../`) solo dentro de una misma feature o módulo. ESLint rechaza subir dos niveles (`../../`). Excepción: `app/routes/prerender.ts` importa `#features/blog/api/posts` directo (con `eslint-disable` justificado), porque `react-router.config.ts` no puede cargar las vistas; esa cadena no lleva JSX ni CSS.
 - **`VITE_*` son públicas**: nunca secretos.
 - **Commits**: Conventional Commits (`feat(scope): …`), validados por commitlint.
 
@@ -51,9 +54,11 @@ Capas en un solo sentido: `routes → sections/views → sections/components →
 
 - `new-page`: página o ruta nueva completa.
 - `new-component`: primitivo de UI con story y test.
-- `new-feature`: funcionalidad con datos por capas.
+- `new-feature`: carpeta `src/features/<dominio>/` completa (datos, hooks, componentes, vista).
 - `react-router`: referencia oficial del framework.
-- `/opsx:propose`, `/opsx:apply`, `/opsx:archive`: cambios grandes con OpenSpec (`openspec/`).
+- `/opsx:propose`, `/opsx:apply`, `/opsx:archive`: cambios grandes con OpenSpec (`docs/openspec/`).
+
+**OpenSpec vive en `docs/openspec/`**, así que la raíz de OpenSpec es `docs/`. La CLI busca `openspec/` desde el directorio actual hacia arriba y no admite otra ruta. Corre **todo** comando `openspec` (incluido `openspec context --json` de las skills) desde `docs/`: `cd docs && openspec …`. Desde la raíz del repo no lo encuentra y puede resolver otro `openspec/` de un directorio superior.
 
 ## MCP
 

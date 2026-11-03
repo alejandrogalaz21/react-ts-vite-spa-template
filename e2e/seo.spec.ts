@@ -40,3 +40,21 @@ test('unknown paths answer 404 with a noindex page', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Página no encontrada');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
 });
+
+test('a page whose flag is off serves "coming soon" with noindex and stays out of the sitemap', async ({
+  page,
+  request,
+}) => {
+  const response = await page.goto('/services');
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Estamos preparando esta página');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  expect(await sitemapPaths(request)).not.toContain('/services');
+});
+
+test('the 404 page suggests pages that exist', async ({ page }) => {
+  await page.goto('/does-not-exist');
+  const suggestions = page.getByRole('navigation', { name: 'Quizá buscabas' });
+  await expect(suggestions.getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/blog');
+  await expect(suggestions.getByRole('link', { name: 'Servicios' })).toHaveCount(0);
+});

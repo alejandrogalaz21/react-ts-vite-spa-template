@@ -4,7 +4,7 @@ CSS plano con tokens. Sin UI kit ni framework de utilidades (ver `docs/decisions
 
 ## Tokens
 
-`design/tokens.json` → `npm run tokens` → `src/styles/tokens.css`.
+`design/tokens.json` → `npm run tokens` → `src/shared/styles/tokens.css`.
 
 | Grupo            | Variables CSS                                                                                              | Ejemplo                                           |
 | ---------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -23,7 +23,7 @@ Cada color del JSON lleva `usage`: es la guía de cuándo usarlo. Los pares text
 - **`public/theme-init.js`** lo fija antes del primer pintado (preferencia guardada o `prefers-color-scheme`). Así no hay parpadeo, y como archivo externo funciona con una CSP estricta.
 - **`useTheme()`** lo lee y lo cambia.
 
-## Componentes (`src/components/ui`)
+## Componentes (`src/shared/ui`)
 
 | Componente                     | Notas                                                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------- |

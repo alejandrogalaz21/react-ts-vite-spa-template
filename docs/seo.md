@@ -4,14 +4,14 @@ El objetivo: que un crawler o una vista previa de enlace reciban el HTML complet
 
 ## Piezas
 
-| Pieza                   | Archivo                                              | Qué hace                                                                                                                                                 |
-| ----------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Prerender               | `react-router.config.ts` + `src/routes/prerender.ts` | Un `index.html` por URL y locale, con contenido, `<title>`, meta y JSON-LD.                                                                              |
-| `<head>` por página     | `src/seo/meta.ts` → `buildMeta()`                    | title, description, robots, canonical, hreflang (+ `x-default`), Open Graph (con `og:locale` e imagen 1200×630), Twitter card, JSON-LD.                  |
-| Datos estructurados     | `src/seo/json-ld.ts`                                 | `Organization` y `WebSite` en home, `BlogPosting` en posts, `BreadcrumbList` en páginas internas. Salen de config y contenido, nunca fijos en la página. |
-| Sitemap y robots        | `scripts/postbuild.mjs` + `scripts/seo/sitemap.mjs`  | Lee el `<head>` de cada HTML del build y genera `sitemap.xml` con alternates `xhtml:link` y `robots.txt` con la línea `Sitemap:`.                        |
-| 404 real                | `src/routes/not-found.tsx` + host                    | `/404/index.html` con `noindex`; el host lo sirve con status 404.                                                                                        |
-| Entornos no productivos | `VITE_ALLOW_INDEXING=false`                          | `noindex` en todo, `robots.txt` con `Disallow: /`, sin sitemap.                                                                                          |
+| Pieza                   | Archivo                                                  | Qué hace                                                                                                                                                 |
+| ----------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prerender               | `react-router.config.ts` + `src/app/routes/prerender.ts` | Un `index.html` por URL y locale, con contenido, `<title>`, meta y JSON-LD.                                                                              |
+| `<head>` por página     | `src/shared/seo/meta.ts` → `buildMeta()`                 | title, description, robots, canonical, hreflang (+ `x-default`), Open Graph (con `og:locale` e imagen 1200×630), Twitter card, JSON-LD.                  |
+| Datos estructurados     | `src/shared/seo/json-ld.ts`                              | `Organization` y `WebSite` en home, `BlogPosting` en posts, `BreadcrumbList` en páginas internas. Salen de config y contenido, nunca fijos en la página. |
+| Sitemap y robots        | `scripts/postbuild.mjs` + `scripts/seo/sitemap.mjs`      | Lee el `<head>` de cada HTML del build y genera `sitemap.xml` con alternates `xhtml:link` y `robots.txt` con la línea `Sitemap:`.                        |
+| 404 real                | `src/app/routes/not-found.tsx` + host                    | `/404/index.html` con `noindex`; el host lo sirve con status 404.                                                                                        |
+| Entornos no productivos | `VITE_ALLOW_INDEXING=false`                              | `noindex` en todo, `robots.txt` con `Disallow: /`, sin sitemap.                                                                                          |
 
 ## Reglas que el build garantiza
 
